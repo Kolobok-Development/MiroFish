@@ -70,6 +70,8 @@ import json
 import logging
 import multiprocessing
 import random
+
+START_HOUR = int(os.environ.get("MIROFISH_START_HOUR", "0")) % 24
 import signal
 import sqlite3
 import warnings
@@ -1232,7 +1234,9 @@ async def run_twitter_simulation(
                 main_logger.info(f"收到退出信号，在第 {round_num + 1} 轮停止模拟")
             break
         
-        simulated_minutes = round_num * minutes_per_round
+        # MIROFISH_START_HOUR shifts the simulated clock (default 0 = midnight), so a
+        # run truncated by --max-rounds can start at an active hour instead of at night.
+        simulated_minutes = START_HOUR * 60 + round_num * minutes_per_round
         simulated_hour = (simulated_minutes // 60) % 24
         simulated_day = simulated_minutes // (60 * 24) + 1
         
@@ -1431,7 +1435,9 @@ async def run_reddit_simulation(
                 main_logger.info(f"收到退出信号，在第 {round_num + 1} 轮停止模拟")
             break
         
-        simulated_minutes = round_num * minutes_per_round
+        # MIROFISH_START_HOUR shifts the simulated clock (default 0 = midnight), so a
+        # run truncated by --max-rounds can start at an active hour instead of at night.
+        simulated_minutes = START_HOUR * 60 + round_num * minutes_per_round
         simulated_hour = (simulated_minutes // 60) % 24
         simulated_day = simulated_minutes // (60 * 24) + 1
         

@@ -28,13 +28,15 @@ def set_locale(locale: str):
 def get_locale() -> str:
     if has_request_context():
         raw = request.headers.get('Accept-Language', 'zh')
-        return raw if raw in _translations else 'zh'
+        # A language listed in languages.json is valid for LLM output even without
+        # a UI translation file (e.g. "ru"); t() then falls back to English.
+        return raw if raw in _translations or raw in _languages else 'zh'
     return getattr(_thread_local, 'locale', 'zh')
 
 
 def t(key: str, **kwargs) -> str:
     locale = get_locale()
-    messages = _translations.get(locale, _translations.get('zh', {}))
+    messages = _translations.get(locale) or _translations.get('en') or _translations.get('zh', {})
 
     value = messages
     for part in key.split('.'):
